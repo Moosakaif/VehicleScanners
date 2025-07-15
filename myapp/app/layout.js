@@ -31,6 +31,7 @@ export default function RootLayout({ children }) {
     <html lang="en">
       <head>
         <title>Vehicle Scanners</title>
+        <script src={`https://www.paypal.com/sdk/js?client-id=${process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID}&currency=GBP`}></script>
       </head>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         {children}

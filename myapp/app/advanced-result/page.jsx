@@ -10,12 +10,10 @@ const InnerPage = () => {
   const formRef = useRef(null);
 
   const [registrationNumber, setRegistrationNumber] = useState("");
-  const [paymentToken, setPaymentToken] = useState("");
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [isLoading, setIsLoading] = useState(false); // loading state
-  const [isTokenLoading, setIsTokenLoading] = useState(true); // loading state
 
   useEffect(() => {
     const regNumber = searchParams.get("reg");
@@ -24,91 +22,7 @@ const InnerPage = () => {
     }
   }, [searchParams]);
 
-  useEffect(() => {
-    handleGetPaymentToken()
-      .then((data) => setPaymentToken(data))
-      .catch((err) => alert(err))
-      .finally(() => setIsTokenLoading(false));
-  }, []);
-
-  const handleGetPaymentToken = async () => {
-    const params = {
-      getHostedPaymentPageRequest: {
-        merchantAuthentication: {
-          name: process.env.NEXT_PUBLIC_API_LOGIN_ID,
-          transactionKey: process.env.NEXT_PUBLIC_TRANSACTION_KEY,
-        },
-        transactionRequest: {
-          transactionType: "authCaptureTransaction",
-          amount: "44.99",
-        },
-        hostedPaymentSettings: {
-          setting: [
-            {
-              settingName: "hostedPaymentReturnOptions",
-              settingValue: `{"showReceipt": true, "url": "${process.env.NEXT_PUBLIC_BASE_URL}", "urlText": "Continue", "cancelUrl": "${process.env.NEXT_PUBLIC_BASE_URL}", "cancelUrlText": "Cancel"}`,
-            },
-            {
-              settingName: "hostedPaymentButtonOptions",
-              settingValue: '{"text": "Pay"}',
-            },
-            {
-              settingName: "hostedPaymentStyleOptions",
-              settingValue: '{"bgColor": "blue"}',
-            },
-            {
-              settingName: "hostedPaymentPaymentOptions",
-              settingValue:
-                '{"cardCodeRequired": true, "showCreditCard": true, "showBankAccount": true}',
-            },
-            {
-              settingName: "hostedPaymentSecurityOptions",
-              settingValue: '{"captcha": false}',
-            },
-            {
-              settingName: "hostedPaymentShippingAddressOptions",
-              settingValue: '{"show": false, "required": false}',
-            },
-            {
-              settingName: "hostedPaymentBillingAddressOptions",
-              settingValue: '{"show": false, "required": false}',
-            },
-            {
-              settingName: "hostedPaymentCustomerOptions",
-              settingValue:
-                '{"showEmail": false, "requiredEmail": false, "addPaymentProfile": false}',
-            },
-            {
-              settingName: "hostedPaymentOrderOptions",
-              settingValue:
-                '{"show": true, "merchantName": "Vehicle Scanners"}',
-            },
-          ],
-        },
-      },
-    };
-
-    const response = await axios.post(
-      process.env.NEXT_PUBLIC_API_ENDPOINT,
-      params,
-      {
-        headers: {
-          "Content-Type": "application/json",
-        },
-      }
-    );
-
-    if (response?.data?.messages?.resultCode == "Ok") {
-      return response?.data?.token;
-    } else {
-      console.error(response?.data?.messages?.message[0]?.text);
-      throw new Error("Payment Initialization Failed!");
-    }
-  };
-
-  const handleGetReport = async (e) => {
-    e.preventDefault();
-
+  const handleGetReport = async () => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
     if (!fullName || !email || !phone || !registrationNumber) {
@@ -139,7 +53,6 @@ const InnerPage = () => {
       );
 
       console.log("Email sent successfully!");
-      formRef.current.submit();
     } catch (error) {
       console.error("Email sending error:", error);
       alert("Something went wrong while sending email. Please try again.");
@@ -149,6 +62,42 @@ const InnerPage = () => {
   };
 
   const [emailError, setEmailError] = useState("");
+
+  useEffect(() => {
+    // Ensure the PayPal script is loaded before rendering buttons
+    if (typeof window !== "undefined" && window.paypal) {
+      const paypalButtonContainer = document.getElementById("paypal-button-container");
+      if (paypalButtonContainer) {
+        // Clear any existing buttons to prevent duplicates on re-renders
+        paypalButtonContainer.innerHTML = "";
+
+        window.paypal.Buttons({
+          createOrder: (data, actions) => {
+            return actions.order.create({
+              purchase_units: [
+                {
+                  amount: {
+                    value: "44.99", // Ensure this matches your product price for advanced-result
+                    currency_code: "GBP", // Set currency to GBP
+                  },
+                },
+              ],
+            });
+          },
+          onApprove: async (data, actions) => {
+            return actions.order.capture().then(async (details) => {
+              alert("Transaction completed by " + details.payer.name.given_name);
+              await handleGetReport();
+            });
+          },
+          onError: (err) => {
+            console.error("PayPal Checkout Error:", err);
+            alert("PayPal transaction failed. Please try again.");
+          },
+        }).render("#paypal-button-container");
+      }
+    }
+  }, [fullName, email, phone, registrationNumber]); // Dependencies to re-render if form fields change
 
   return (
     <div className="bg-gray-100 min-h-screen">
@@ -232,6 +181,7 @@ const InnerPage = () => {
                     onChange={(e) => setRegistrationNumber(e.target.value)}
                   />
                 </div>
+                <div id="paypal-button-container" className="mt-6"></div> {/* PayPal button container */}
               </form>
             </div>
           </div>
@@ -304,41 +254,6 @@ const InnerPage = () => {
                   </div>
                 </div>
               </div>
-            </div>
-
-            <div className="mt-4 flex justify-center">
-              {paymentToken ? (
-                <form
-                  method="post"
-                  action={process.env.NEXT_PUBLIC_PAYMENT_ENDPOINT}
-                  onSubmit={handleGetReport}
-                  ref={formRef}
-                >
-                  <input type="hidden" name="token" value={paymentToken} />
-                  <button
-                    disabled={isLoading || emailError}
-                    className={`bg-yellow-400 hover:bg-yellow-500 text-black px-6 py-2 rounded font-medium ${
-                      isLoading || emailError
-                        ? "opacity-50 cursor-not-allowed"
-                        : ""
-                    }`}
-                  >
-                    {isLoading ? "Sending..." : "Get Report"}
-                  </button>
-                </form>
-              ) : (
-                <div
-                  className={`text-black px-6 py-2 rounded font-medium ${
-                    isTokenLoading
-                      ? "bg-yellow-400 opacity-50 cursor-not-allowed"
-                      : "bg-red-400"
-                  }`}
-                >
-                  {isTokenLoading
-                    ? "Loading..."
-                    : "We cannot process your request right now!"}
-                </div>
-              )}
             </div>
           </div>
         </div>
