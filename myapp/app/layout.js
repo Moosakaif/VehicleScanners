@@ -25,13 +25,19 @@ export default function RootLayout({ children }) {
     s1.charset = "UTF-8";
     s1.setAttribute("crossorigin", "*");
     document.body.appendChild(s1);
+
+    // Dynamically load PayPal SDK script
+    const paypalScript = document.createElement("script");
+    paypalScript.src = `https://www.paypal.com/sdk/js?client-id=${process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID}&currency=GBP`;
+    paypalScript.async = true;
+    document.body.appendChild(paypalScript);
+
   }, []);
 
   return (
     <html lang="en">
       <head>
         <title>Vehicle Scanners</title>
-        <script src={`https://www.paypal.com/sdk/js?client-id=${process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID}&currency=GBP`}></script>
       </head>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         {children}
