@@ -11,6 +11,7 @@ const InnerPage = () => {
 
   const [registrationNumber, setRegistrationNumber] = useState("");
   const [fullName, setFullName] = useState("");
+  const [paymentToken, setPaymentToken] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [isLoading, setIsLoading] = useState(false); // loading state
