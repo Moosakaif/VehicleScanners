@@ -25,89 +25,89 @@ const InnerPage = () => {
     }
   }, [searchParams]);
 
-  // Removed Authorize.net token handling
-  // useEffect(() => {
-  //   handleGetPaymentToken()
-  //     .then((data) => setPaymentToken(data))
-  //     .catch((err) => alert(err))
-  //     .finally(() => setIsTokenLoading(false));
-  // }, []);
+  //Removed Authorize.net token handling
+  useEffect(() => {
+    handleGetPaymentToken()
+      .then((data) => setPaymentToken(data))
+      .catch((err) => alert(err))
+      .finally(() => setIsTokenLoading(false));
+  }, []);
 
-  // Removed Authorize.net handleGetPaymentToken function
-  // const handleGetPaymentToken = async () => {
-  //   const params = {
-  //     getHostedPaymentPageRequest: {
-  //       merchantAuthentication: {
-  //         name: process.env.NEXT_PUBLIC_API_LOGIN_ID,
-  //         transactionKey: process.env.NEXT_PUBLIC_TRANSACTION_KEY,
-  //       },
-  //       transactionRequest: {
-  //         transactionType: "authCaptureTransaction",
-  //         amount: "29.99",
-  //       },
-  //       hostedPaymentSettings: {
-  //         setting: [
-  //           {
-  //             settingName: "hostedPaymentReturnOptions",
-  //             settingValue: `{"showReceipt": true, "url": "${process.env.NEXT_PUBLIC_BASE_URL}", "urlText": "Continue", "cancelUrl": "${process.env.NEXT_PUBLIC_BASE_URL}", "cancelUrlText": "Cancel"}`,
-  //           },
-  //           {
-  //             settingName: "hostedPaymentButtonOptions",
-  //             settingValue: '{"text": "Pay"}',
-  //           },
-  //           {
-  //             settingName: "hostedPaymentStyleOptions",
-  //             settingValue: '{"bgColor": "blue"}',
-  //           },
-  //           {
-  //             settingName: "hostedPaymentPaymentOptions",
-  //             settingValue:
-  //               '{"cardCodeRequired": true, "showCreditCard": true, "showBankAccount": true}',
-  //           },
-  //           {
-  //             settingName: "hostedPaymentSecurityOptions",
-  //             settingValue: '{"captcha": false}',
-  //           },
-  //           {
-  //             settingName: "hostedPaymentShippingAddressOptions",
-  //             settingValue: '{"show": false, "required": false}',
-  //           },
-  //           {
-  //             settingName: "hostedPaymentBillingAddressOptions",
-  //             settingValue: '{"show": false, "required": false}',
-  //           },
-  //           {
-  //             settingName: "hostedPaymentCustomerOptions",
-  //             settingValue:
-  //               '{"showEmail": false, "requiredEmail": false, "addPaymentProfile": false}',
-  //           },
-  //           {
-  //             settingName: "hostedPaymentOrderOptions",
-  //             settingValue:
-  //               '{"show": true, "merchantName": "Vehicle Scanners"}',
-  //           },
-  //         ],
-  //       },
-  //     },
-  //   };
+  //Removed Authorize.net handleGetPaymentToken function
+  const handleGetPaymentToken = async () => {
+    const params = {
+      getHostedPaymentPageRequest: {
+        merchantAuthentication: {
+          name: process.env.NEXT_PUBLIC_API_LOGIN_ID,
+          transactionKey: process.env.NEXT_PUBLIC_TRANSACTION_KEY,
+        },
+        transactionRequest: {
+          transactionType: "authCaptureTransaction",
+          amount: "29.99",
+        },
+        hostedPaymentSettings: {
+          setting: [
+            {
+              settingName: "hostedPaymentReturnOptions",
+              settingValue: `{"showReceipt": true, "url": "${process.env.NEXT_PUBLIC_BASE_URL}", "urlText": "Continue", "cancelUrl": "${process.env.NEXT_PUBLIC_BASE_URL}", "cancelUrlText": "Cancel"}`,
+            },
+            {
+              settingName: "hostedPaymentButtonOptions",
+              settingValue: '{"text": "Pay"}',
+            },
+            {
+              settingName: "hostedPaymentStyleOptions",
+              settingValue: '{"bgColor": "blue"}',
+            },
+            {
+              settingName: "hostedPaymentPaymentOptions",
+              settingValue:
+                '{"cardCodeRequired": true, "showCreditCard": true, "showBankAccount": true}',
+            },
+            {
+              settingName: "hostedPaymentSecurityOptions",
+              settingValue: '{"captcha": false}',
+            },
+            {
+              settingName: "hostedPaymentShippingAddressOptions",
+              settingValue: '{"show": false, "required": false}',
+            },
+            {
+              settingName: "hostedPaymentBillingAddressOptions",
+              settingValue: '{"show": false, "required": false}',
+            },
+            {
+              settingName: "hostedPaymentCustomerOptions",
+              settingValue:
+                '{"showEmail": false, "requiredEmail": false, "addPaymentProfile": false}',
+            },
+            {
+              settingName: "hostedPaymentOrderOptions",
+              settingValue:
+                '{"show": true, "merchantName": "Vehicle Scanners"}',
+            },
+          ],
+        },
+      },
+    };
 
-  //   const response = await axios.post(
-  //     process.env.NEXT_PUBLIC_API_ENDPOINT,
-  //     params,
-  //     {
-  //       headers: {
-  //         "Content-Type": "application/json",
-  //       },
-  //     }
-  //   );
+    const response = await axios.post(
+      process.env.NEXT_PUBLIC_API_ENDPOINT,
+      params,
+      {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
 
-  //   if (response?.data?.messages?.resultCode == "Ok") {
-  //     return response?.data?.token;
-  //   } else {
-  //     console.error(response?.data?.messages?.message[0]?.text);
-  //     throw new Error("Payment Initialization Failed!");
-  //   }
-  // };
+    if (response?.data?.messages?.resultCode == "Ok") {
+      return response?.data?.token;
+    } else {
+      console.error(response?.data?.messages?.message[0]?.text);
+      throw new Error("Payment Initialization Failed!");
+    }
+  };
 
   // Renamed from handleGetReport to clearly indicate email sending
   const sendReportEmail = async () => {
@@ -156,41 +156,41 @@ const InnerPage = () => {
     setCurrentStep('payment'); // Move to the payment step
   };
 
-  useEffect(() => {
-    // Ensure the PayPal script is loaded before rendering buttons and only on the payment step
-    if (currentStep === 'payment' && typeof window !== "undefined" && window.paypal) {
-      const paypalButtonContainer = document.getElementById("paypal-button-container");
-      if (paypalButtonContainer) {
-        // Clear any existing buttons to prevent duplicates on re-renders
-        paypalButtonContainer.innerHTML = "";
+  // useEffect(() => {
+  //   // Ensure the PayPal script is loaded before rendering buttons and only on the payment step
+  //   if (currentStep === 'payment' && typeof window !== "undefined" && window.paypal) {
+  //     const paypalButtonContainer = document.getElementById("paypal-button-container");
+  //     if (paypalButtonContainer) {
+  //       // Clear any existing buttons to prevent duplicates on re-renders
+  //       paypalButtonContainer.innerHTML = "";
 
-        window.paypal.Buttons({
-          createOrder: (data, actions) => {
-            return actions.order.create({
-              purchase_units: [
-                {
-                  amount: {
-                    value: "29.99", // Ensure this matches your product price
-                    currency_code: "GBP", // Set currency to GBP
-                  },
-                },
-              ],
-            });
-          },
-          onApprove: async (data, actions) => {
-            return actions.order.capture().then(async (details) => {
-              alert("Transaction completed by " + details.payer.name.given_name);
-              await sendReportEmail(); // Call sendReportEmail after successful payment
-            });
-          },
-          onError: (err) => {
-            console.error("PayPal Checkout Error:", err);
-            alert("PayPal transaction failed. Please try again.");
-          },
-        }).render("#paypal-button-container");
-      }
-    }
-  }, [currentStep, fullName, email, phone, registrationNumber]); // Dependencies include currentStep
+  //       window.paypal.Buttons({
+  //         createOrder: (data, actions) => {
+  //           return actions.order.create({
+  //             purchase_units: [
+  //               {
+  //                 amount: {
+  //                   value: "29.99", // Ensure this matches your product price
+  //                   currency_code: "GBP", // Set currency to GBP
+  //                 },
+  //               },
+  //             ],
+  //           });
+  //         },
+  //         onApprove: async (data, actions) => {
+  //           return actions.order.capture().then(async (details) => {
+  //             alert("Transaction completed by " + details.payer.name.given_name);
+  //             await sendReportEmail(); // Call sendReportEmail after successful payment
+  //           });
+  //         },
+  //         onError: (err) => {
+  //           console.error("PayPal Checkout Error:", err);
+  //           alert("PayPal transaction failed. Please try again.");
+  //         },
+  //       }).render("#paypal-button-container");
+  //     }
+  //   }
+  // }, [currentStep, fullName, email, phone, registrationNumber]); // Dependencies include currentStep
 
   return (
     <div className="bg-gray-100 min-h-screen">

@@ -27,10 +27,10 @@ export default function RootLayout({ children }) {
     document.body.appendChild(s1);
 
     // Dynamically load PayPal SDK script
-    const paypalScript = document.createElement("script");
-    paypalScript.src = `https://www.paypal.com/sdk/js?client-id=${process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID}&currency=GBP`;
-    paypalScript.async = true;
-    document.body.appendChild(paypalScript);
+    // const paypalScript = document.createElement("script");
+    // paypalScript.src = `https://www.paypal.com/sdk/js?client-id=${process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID}&currency=GBP`;
+    // paypalScript.async = true;
+    // document.body.appendChild(paypalScript);
 
   }, []);
 
